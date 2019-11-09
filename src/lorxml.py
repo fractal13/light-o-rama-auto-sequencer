@@ -266,7 +266,7 @@ class Sequence:
         self.saveFileVersion = 14
         self.author = "cgl"
         self.createdAt = "11/08/2019 2:00:00 PM"
-        self.musicFilename = "foo.mp3"
+        self.musicFilename = ""
         self.videoUsage = "2"
         self.channels = Channels()
         self.timing_grids = TimingGrids()
@@ -297,8 +297,9 @@ class Sequence:
         attributes = { "saveFileVersion": str(self.saveFileVersion),
                        "author": str(self.author),
                        "createdAt": str(self.createdAt),
-                       "musicFilename": str(self.musicFilename),
                        "videoUsage": str(self.videoUsage) }
+        if self.musicFilename:
+            attributes["musicFilename"] = str(self.musicFilename)
         e = xml.etree.ElementTree.Element("sequence", attributes )
         e.append(self.channels.toElement())
         e.append(self.timing_grids.toElement())

@@ -69,11 +69,15 @@ class Channel:
         return
 
     def addConstantEffect(self, effect_type, start_centisecond, end_centisecond, intensity):
+        if end_centisecond > self.centiseconds:
+            self.centiseconds = end_centisecond
         effect = ConstantEffect(effect_type, start_centisecond, end_centisecond, intensity)
         self.effect_list.append(effect)
         return
 
     def addVariableEffect(self, effect_type, start_centisecond, end_centisecond, start_intensity, end_intensity):
+        if end_centisecond > self.centiseconds:
+            self.centiseconds = end_centisecond
         effect = VariableEffect(effect_type, start_centisecond, end_centisecond, start_intensity, end_intensity)
         self.effect_list.append(effect)
         return
@@ -195,7 +199,15 @@ class Sequence:
         fout.write(prettify(e))
         fout.close()
         return
-    
+
+def add_chase(sequence, channel_indexes, start_centiseconds, end_centiseconds, duration_centiseconds, intensity):
+    i = 0
+    for centisecond in range(start_centiseconds, end_centiseconds, duration_centiseconds):
+        sequence.addConstantEffect( channel_indexes[i], "intensity", centisecond, centisecond + duration_centiseconds, intensity )
+        i += 1
+        i %= len(channel_indexes)
+    return
+
 def main():
     s = Sequence()
     i = s.addChannel("A: 3.1", 3, 1)

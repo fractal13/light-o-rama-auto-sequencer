@@ -11,7 +11,10 @@ def main():
     lorxml.add_chase(s, [k,j,i],       1000, 2000,  66,  50)
     lorxml.add_chase(s, [i,j,k,j,k,k], 2000, 4000,  10,  75)
 
-    s.write("three_channel_chase.xml")
+    tg_0 = s.addFixedTimingGrid("Fixed Timing 10 centi", 10)
+    s.addTrack(4000, tg_0)
+
+    s.write("three_channel_chase.las")
     return
 
 if __name__ == "__main__":

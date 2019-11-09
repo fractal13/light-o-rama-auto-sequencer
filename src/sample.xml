@@ -16,6 +16,16 @@
     <timingGrid name="next one" saveID="1" type="freeform"/>
     <timingGrid name="great here" saveID="2" spacing="34" type="fixed"/>
   </timingGrids>
-  <tracks/>
+  <tracks>
+    <track timingGrid="0" totalCentiseconds="1000">
+      <channels>
+        <channel savedIndex="0"/>
+        <channel savedIndex="1"/>
+        <channel savedIndex="2"/>
+        <channel savedIndex="3"/>
+      </channels>
+      <loopLevels/>
+    </track>
+  </tracks>
   <animation columns="50" image="" rows="40"/>
 </sequence>

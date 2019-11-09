@@ -98,6 +98,11 @@ class Channel:
         for effect in self.effect_list:
             e.append(effect.toElement())
         return e
+    
+    def toTrackElement(self):
+        attributes = { "savedIndex": str(self.savedIndex) }
+        e = xml.etree.ElementTree.Element("channel", attributes)
+        return e
 
 class Channels:
 
@@ -124,6 +129,14 @@ class Channels:
         e = xml.etree.ElementTree.Element("channels", attributes)
         for saved_index in self.channel_list:
             c = self.channel_list[saved_index].toElement()
+            e.append(c)
+        return e
+
+    def toTrackElement(self):
+        attributes = {}
+        e = xml.etree.ElementTree.Element("channels", attributes)
+        for saved_index in self.channel_list:
+            c = self.channel_list[saved_index].toTrackElement()
             e.append(c)
         return e
 
@@ -192,14 +205,49 @@ class TimingGrids:
             e.append(g)
         return e
 
-class Tracks:
+class LoopLevels:
 
     def __init__(self):
         return
 
     def toElement(self):
         attributes = {}
+        e = xml.etree.ElementTree.Element("loopLevels", attributes)
+        return e
+
+class Track:
+
+    def __init__(self, total_centiseconds, grid_id, channels):
+        self.totalCentiseconds = total_centiseconds
+        self.timingGrid = grid_id
+        self.channels = channels
+        self.loop_levels = LoopLevels()
+        return
+
+    def toElement(self):
+        attributes = { "totalCentiseconds": str(self.totalCentiseconds),
+                       "timingGrid": str(self.timingGrid) }
+        e = xml.etree.ElementTree.Element("track", attributes)
+        e.append(self.channels.toTrackElement())
+        e.append(self.loop_levels.toElement())
+        return e
+
+class Tracks:
+
+    def __init__(self):
+        self.track_list = []
+        return
+
+    def addTrack(self, total_centiseconds, grid_id, channels):
+        track = Track(total_centiseconds, grid_id, channels)
+        self.track_list.append(track)
+        return
+
+    def toElement(self):
+        attributes = {}
         e = xml.etree.ElementTree.Element("tracks", attributes)
+        for track in self.track_list:
+            e.append(track.toElement())
         return e
     
 class Animation:
@@ -240,6 +288,10 @@ class Sequence:
 
     def addFixedTimingGrid(self, name, spacing):
         return self.timing_grids.addFixedTimingGrid(name, spacing)
+
+    def addTrack(self, total_centiseconds, grid_id):
+        self.tracks.addTrack(total_centiseconds, grid_id, self.channels)
+        return
 
     def toElement(self):
         attributes = { "saveFileVersion": str(self.saveFileVersion),
@@ -284,6 +336,8 @@ def main():
     tg_0 = s.addFreeFormTimingGrid("first grid")
     tg_1 = s.addFreeFormTimingGrid("next one")
     tg_2 = s.addFixedTimingGrid("great here", 34)
+
+    s.addTrack(1000, tg_0)
     
     s.write("sample.xml")
     return

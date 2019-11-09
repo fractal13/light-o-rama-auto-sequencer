@@ -25,8 +25,8 @@ class Effect:
 
     def toElement(self,attribs={}):
         attributes = { "type": str(self.type),
-                       "startCentiSecond": str(self.startCentisecond),
-                       "endCentiSecond": str(self.endCentisecond) }
+                       "startCentisecond": str(self.startCentisecond),
+                       "endCentisecond": str(self.endCentisecond) }
         attributes.update(attribs)
         e = xml.etree.ElementTree.Element("effect", attributes)
         return e
@@ -40,7 +40,7 @@ class ConstantEffect(Effect):
 
     def toElement(self):
         attributes = { "intensity": str(self.intensity) }
-        return Effect.toElement(self,attributes)
+        return super().toElement(attributes)
 
 class VariableEffect(Effect):
 
@@ -53,7 +53,7 @@ class VariableEffect(Effect):
     def toElement(self):
         attributes = { "startIntensity": str(self.startIntensity),
                        "endIntensity": str(self.endIntensity) }
-        return Effect.toElement(self,attributes)
+        return super().toElement(attributes)
 
 class Channel:
 
@@ -127,14 +127,69 @@ class Channels:
             e.append(c)
         return e
 
+# grid types = { freeform, ??? }
+
+class TimingGrid:
+
+    def __init__(self, save_id, name, grid_type):
+        self.save_id = save_id
+        self.name = name
+        self.grid_type = grid_type
+        return
+
+    def toElement(self,attribs={}):
+        attributes = { "type": str(self.grid_type),
+                       "name": str(self.name),
+                       "saveID": str(self.save_id) }
+        attributes.update(attribs)
+        e = xml.etree.ElementTree.Element("timingGrid", attributes)
+        return e
+    
+class FreeFormTimingGrid(TimingGrid):
+
+    def __init__(self, save_id, name):
+        super().__init__(save_id, name, "freeform")
+        return
+
+class FixedTimingGrid(TimingGrid):
+
+    def __init__(self, save_id, name, spacing):
+        super().__init__(save_id, name, "fixed")
+        self.spacing = spacing
+        return
+
+    def toElement(self):
+        attributes = { "spacing": str(self.spacing) }
+        return super().toElement(attributes)
+    
+
 class TimingGrids:
 
     def __init__(self):
+        self.next_id = 0
+        self.timing_grids = {}
         return
+
+    def addFreeFormTimingGrid(self, name):
+        save_id = self.next_id
+        timing_grid = FreeFormTimingGrid(save_id, name)
+        self.timing_grids[save_id] = timing_grid
+        self.next_id += 1
+        return save_id
+
+    def addFixedTimingGrid(self, name, spacing):
+        save_id = self.next_id
+        timing_grid = FixedTimingGrid(save_id, name, spacing)
+        self.timing_grids[save_id] = timing_grid
+        self.next_id += 1
+        return save_id
 
     def toElement(self):
         attributes = {}
         e = xml.etree.ElementTree.Element("timingGrids", attributes)
+        for save_id in self.timing_grids:
+            g = self.timing_grids[save_id].toElement()
+            e.append(g)
         return e
 
 class Tracks:
@@ -180,6 +235,12 @@ class Sequence:
     def addVariableEffect(self, channel_index, effect_type, start_centisecond, end_centisecond, start_intensity, end_intensity):
         return self.channels.addVariableEffect(channel_index, effect_type, start_centisecond, end_centisecond, start_intensity, end_intensity)
 
+    def addFreeFormTimingGrid(self, name):
+        return self.timing_grids.addFreeFormTimingGrid(name)
+
+    def addFixedTimingGrid(self, name, spacing):
+        return self.timing_grids.addFixedTimingGrid(name, spacing)
+
     def toElement(self):
         attributes = { "saveFileVersion": str(self.saveFileVersion),
                        "author": str(self.author),
@@ -219,6 +280,10 @@ def main():
     s.addConstantEffect(i, "intensity", 95, 200, 64)
     s.addConstantEffect(i, "shimmer", 300, 500, 100)
     s.addVariableEffect(i, "intensity", 500, 1000, 100, 0)
+
+    tg_0 = s.addFreeFormTimingGrid("first grid")
+    tg_1 = s.addFreeFormTimingGrid("next one")
+    tg_2 = s.addFixedTimingGrid("great here", 34)
     
     s.write("sample.xml")
     return

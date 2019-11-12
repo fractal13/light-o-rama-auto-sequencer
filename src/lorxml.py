@@ -274,6 +274,10 @@ class Sequence:
         self.animation = Animation()
         return
 
+    def addMusicFile(self, filename):
+        self.musicFilename = filename
+        return
+
     def addChannel(self, name, unit, circuit):
         return self.channels.addChannel(name, unit, circuit)
 
